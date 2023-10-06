@@ -26,92 +26,99 @@ class TaskTile extends StatelessWidget {
       key: key,
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
+        height: 55,
         key: key,
         clipBehavior: Clip.antiAliasWithSaveLayer,
         decoration: BoxDecoration(
           color: Color(0xFFFE4A49),
           borderRadius: BorderRadius.all(Radius.circular(30)),
         ),
-        child: Slidable(
-          key: key,
-          endActionPane: ActionPane(
-            motion: ScrollMotion(),
-            children: [
-              SlidableAction(
-                onPressed: (context) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            EditScreen(isDone: isDone, oldValue: title),
-                      ));
-                },
-                backgroundColor: Colors.yellow,
-                foregroundColor: Colors.white,
-                icon: Icons.edit,
-                padding: EdgeInsets.only(right: 40),
-                label: 'Edit',
-                borderRadius: BorderRadius.only(
+        child: Stack(children: [
+          // Row(
+          //   children: [],
+          // ),
+          Container(width: 200, height: 55, color: Colors.yellow),
+          Slidable(
+            key: key,
+            endActionPane: ActionPane(
+              motion: ScrollMotion(),
+              children: [
+                SlidableAction(
+                  onPressed: (context) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EditScreen(isDone: isDone, oldValue: title),
+                        ));
+                  },
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.white,
+                  icon: Icons.edit,
+                  padding: EdgeInsets.only(right: 40),
+                  label: 'Edit',
+                  borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(30),
+                      topRight: Radius.circular(30)),
+                ),
+                SlidableAction(
+                  borderRadius: BorderRadius.only(
                     bottomRight: Radius.circular(30),
-                    topRight: Radius.circular(30)),
-              ),
-              SlidableAction(
-                borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  onPressed: (context) async {
+                    Provider.of<TaskData>(context, listen: false)
+                        .removeTask(index);
+                    dynamic query = await Provider.of<TaskData>(context,
+                            listen: false)
+                        .sqlDb
+                        .readData(
+                            'SELECT id FROM notes WHERE task = "$title" AND isDone = $isDone');
+                    int everIndex = query[0]['id'];
+                    int response =
+                        await Provider.of<TaskData>(context, listen: false)
+                            .sqlDb
+                            .delete('notes', 'id = $everIndex');
+                  },
+                  backgroundColor: Color(0xFFFE4A49),
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'Delete',
+                  padding: EdgeInsets.only(right: 40),
                 ),
-                onPressed: (context) async {
-                  Provider.of<TaskData>(context, listen: false)
-                      .removeTask(index);
-                  dynamic query = await Provider.of<TaskData>(context,
-                          listen: false)
-                      .sqlDb
-                      .readData(
-                          'SELECT id FROM notes WHERE task = "$title" AND isDone = $isDone');
-                  int everIndex = query[0]['id'];
-                  int response =
-                      await Provider.of<TaskData>(context, listen: false)
-                          .sqlDb
-                          .delete('notes', 'id = $everIndex');
-                },
-                backgroundColor: Color(0xFFFE4A49),
-                foregroundColor: Colors.white,
-                icon: Icons.delete,
-                label: 'Delete',
-                padding: EdgeInsets.only(right: 40),
-              ),
-            ],
-          ),
-          child: Container(
-            padding: EdgeInsets.only(right: 20),
-            decoration: BoxDecoration(
-                color: Colors.yellow,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  topLeft: Radius.circular(30),
-                )),
+              ],
+            ),
             child: Container(
+              padding: EdgeInsets.only(right: 20),
               decoration: BoxDecoration(
-                  color: Color(0xff8ed4fa),
-                  borderRadius: BorderRadius.circular(30)),
-              child: ListTile(
-                title: Text(
-                  title,
-                  style: TextStyle(
-                      decoration:
-                          isDone == 1 ? TextDecoration.lineThrough : null,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18),
-                ),
-                trailing: Checkbox(
-                  value: isDone == 1 ? true : false,
-                  onChanged: callback,
+                  color: Colors.yellow,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    topLeft: Radius.circular(30),
+                  )),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Color(0xff8ed4fa),
+                    borderRadius: BorderRadius.circular(30)),
+                child: ListTile(
+                  title: Text(
+                    title,
+                    style: TextStyle(
+                        decoration:
+                            isDone == 1 ? TextDecoration.lineThrough : null,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18),
+                  ),
+                  trailing: Checkbox(
+                    value: isDone == 1 ? true : false,
+                    onChanged: callback,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ]),
       ),
     );
   }
